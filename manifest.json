@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Drink Reminder 💧",
+  "version": "1.0.0",
+  "description": "Nags you with video + music until you confirm you drank water.",
+  "permissions": ["storage", "alarms", "notifications", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Drink Reminder",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon.png"
+  }
+}
