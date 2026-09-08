@@ -78,9 +78,15 @@ async function getActiveTab() {
   return tab;
 }
 
-// notifikasi OS selalu dikirim tiap waktunya minum — user bisa aja lagi minimize
-// atau full-screen di aplikasi lain, overlay di tab gak keliatan (tapi tetap bunyi)
-function sendDrinkNotification() {
+// cek apakah ada window Chrome yang sedang focused — kalau iya, overlay aja cukup,
+// notifikasi OS gak perlu (biar ganggu kalau lagi pakai Chrome)
+async function isChromeFocused() {
+  const wins = await chrome.windows.getAll();
+  return wins.some((w) => w.focused);
+}
+
+async function sendDrinkNotification() {
+  if (await isChromeFocused()) return; // Chrome lagi aktif — overlay udah keliatan, skip notif
   chrome.notifications.create({
     type: "basic",
     iconUrl: "icon.png",
