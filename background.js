@@ -78,26 +78,7 @@ async function getActiveTab() {
   return tab;
 }
 
-// cek apakah ada window Chrome yang sedang focused — kalau iya, overlay aja cukup,
-// notifikasi OS gak perlu (biar ganggu kalau lagi pakai Chrome)
-async function isChromeFocused() {
-  const wins = await chrome.windows.getAll();
-  return wins.some((w) => w.focused);
-}
-
-async function sendDrinkNotification() {
-  if (await isChromeFocused()) return; // Chrome lagi aktif — overlay udah keliatan, skip notif
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "icon.png",
-    title: "Time to drink! 💧",
-    message: "Pengamen datang bawa recehan — buka tab browser kalau dia belum muncul.",
-    priority: 2
-  });
-}
-
 async function notifyActiveTab() {
-  sendDrinkNotification();
   const tab = await getActiveTab();
   if (!tab?.id || isRestrictedUrl(tab.url)) return 0;
   return (await showInTab(tab.id)) ? 1 : 0;

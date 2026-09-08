@@ -3,7 +3,7 @@
   "name": "Drink Reminder 💧",
   "version": "1.0.0",
   "description": "Nags you with video + music until you confirm you drank water.",
-  "permissions": ["storage", "alarms", "notifications", "scripting"],
+  "permissions": ["storage", "alarms", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
