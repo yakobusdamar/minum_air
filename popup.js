@@ -64,9 +64,9 @@ slider.addEventListener("input", ()=> val.textContent = fmt(Number(slider.value)
 // tanpa lewat pesan GET_STATE ke service worker. Response GET_STATE yang datang lambat
 // dulunya bisa menimpa posisi checkbox dengan nilai lama -> keliatan "gak kesimpen".
 // storage.local gak punya sync lintas device, jadi nilai yang keliatan selalu yang terakhir ditulis.
-chrome.storage.local.get({ muted: false }, ({ muted }) => { muteEl.checked = !!muted; });
+chrome.storage.local.get({ soundEnabled: true }, ({ soundEnabled }) => { muteEl.checked = !!soundEnabled; });
 muteEl.addEventListener("change", ()=>{
-  chrome.storage.local.set({ muted: muteEl.checked });
+  chrome.storage.local.set({ soundEnabled: muteEl.checked });
 });
 
 saveBtn.addEventListener("click", ()=>{

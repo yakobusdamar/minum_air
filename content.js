@@ -80,8 +80,8 @@
     // simpan overflow asli halaman biar bisa di-restore utuh pas ditutup
     prevOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
-    // toggle mute (baca langsung storage.local, sama sumbernya dengan popup)
-    const { muted } = await chrome.storage.local.get({ muted: false });
+    // toggle suara (baca langsung storage.local, sama sumbernya dengan popup)
+    const { soundEnabled } = await chrome.storage.local.get({ soundEnabled: true });
 
     overlay.innerHTML = `
       <div class="dr-backdrop"></div>
@@ -103,7 +103,7 @@
 
     // kill zombie audio dari sesi sebelumnya (inject lama)
     if (window.__drinkReminderAudio) { try { window.__drinkReminderAudio.pause(); } catch {} }
-    if (!muted) {
+    if (soundEnabled) {
       const audioSrc = await pickRandomAudio();
       if (!audioSrc) return; // no music files found
       bgAudio = new Audio(audioSrc);
@@ -122,7 +122,7 @@
         document.addEventListener("click", unlock, { once: true });
       });
     }
-    // kalau muted: gak ada lagu, jadi gak ada auto-close saat lagu habis —
+    // kalau soundEnabled=false: gak ada lagu, jadi gak ada auto-close saat lagu habis —
     // overlay nutup pas user klik salah satu tombol.
 
     // --- preload semua video biar switch tanpa gap ---
@@ -135,7 +135,7 @@
       overlay.appendChild(v);
     }
     for (const v of [vKasih, vMinum]) {
-      v.playsInline = true; v.muted = muted; v.volume = muted ? 0 : 1.0; v.preload = "auto"; v.style.display = "none";
+      v.playsInline = true; v.muted = !soundEnabled; v.volume = soundEnabled ? 1.0 : 0; v.preload = "auto"; v.style.display = "none";
       overlay.appendChild(v);
     }
     vDatang.src = VIDEO_DATANG_SRC;
