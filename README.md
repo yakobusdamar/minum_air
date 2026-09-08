@@ -16,10 +16,18 @@ When it's time to drink, a video overlay with music appears on your current page
 
 ## Installation
 
-1. Open `chrome://extensions`
-2. Enable **Developer mode** (top right)
-3. Click **Load unpacked** and select this folder
-4. The extension icon appears in your toolbar — configure interval and toggle in the popup
+1. **Clone or download** this repo
+   ```bash
+   git clone https://github.com/your-username/drink-reminder.git
+   ```
+2. Open Chrome and go to `chrome://extensions`
+3. Enable **Developer mode** — toggle in the top-right corner of the page
+4. Click **"Load unpacked"** (top-left)
+5. Select the extension folder (the one containing `manifest.json`)
+6. The 💧 icon appears in your toolbar — pin it for easy access
+7. Click the icon to configure interval and toggle reminders on/off
+
+> **Note:** Developer mode shows a warning on every Chrome launch. That's normal — it's just Chrome reminding you that an unpacked extension is loaded. You can dismiss it.
 
 ## Usage
 
