@@ -6,7 +6,27 @@
   const VIDEO_NYANYI_SRC = chrome.runtime.getURL("assets/pengamen_nyanyi.mp4");
   const VIDEO_KASIH_SRC  = chrome.runtime.getURL("assets/pengamen_kasih.mp4");
   const VIDEO_MINUM_SRC  = chrome.runtime.getURL("assets/pengamen_minum.mp4");
-  const AUDIO_SRC = chrome.runtime.getURL("assets/recehan.mp3");
+  const MAX_MUSIC = 20;
+
+  async function detectMusicFiles() {
+    const found = [];
+    for (let i = 1; i <= MAX_MUSIC; i++) {
+      const url = chrome.runtime.getURL(`assets/music_${i}.mp3`);
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        if (res.ok) found.push(`music_${i}.mp3`);
+      } catch {}
+    }
+    return found;
+  }
+
+  let AUDIO_SRC = null;
+
+  async function pickRandomAudio() {
+    const files = await detectMusicFiles();
+    if (!files.length) return null;
+    return chrome.runtime.getURL("assets/" + files[Math.floor(Math.random() * files.length)]);
+  }
 
   const GREEN_MIN = 30;
   const GREEN_RATIO_LOW = 0.06;
@@ -84,7 +104,9 @@
     // kill zombie audio dari sesi sebelumnya (inject lama)
     if (window.__drinkReminderAudio) { try { window.__drinkReminderAudio.pause(); } catch {} }
     if (!muted) {
-      bgAudio = new Audio(AUDIO_SRC);
+      const audioSrc = await pickRandomAudio();
+      if (!audioSrc) return; // no music files found
+      bgAudio = new Audio(audioSrc);
       window.__drinkReminderAudio = bgAudio;
       bgAudio.loop = false; // habis lagu -> auto close (versi selesai ke-3)
       bgAudio.volume = 1.0;
