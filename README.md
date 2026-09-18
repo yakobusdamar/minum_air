@@ -1,5 +1,10 @@
 # 💧 Drink Reminder
 
+![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue)
+![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)
+![version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![mercy](https://img.shields.io/badge/mercy-none-red)
+
 A Chrome extension that reminds you to drink water — by sending a street performer to your browser tab.
 
 When it's time to drink, a video overlay with music appears on your current page and **won't stop until you confirm you drank water**. No mercy.
@@ -22,13 +27,27 @@ When it's time to drink, a video overlay with music appears on your current page
 
 Click the extension icon to open settings:
 
-- **Power toggle** — turn reminders on/off
-- **Interval** — remind every 5–120 minutes (slider)
-- **🔊 Suara pengamen** — mute/unmute the music
+- **Pengingat aktif** — master on/off switch
+- **Jenis pengamen** — pick your performer: **🐱 Tabby busker** (default) or **🐈 Kitten groups**
+- **Ingatkan setiap** — remind every 5–120 minutes (slider)
+- **🔊 Suara pengamen** — toggle the background music
 - **Test sekarang** — trigger the overlay immediately
-- **Simpan** — save your settings
+- **Simpan** — save the interval
 
-When the reminder fires, click **"Aku sudah minum"** in the overlay to dismiss it.
+When the reminder fires, the overlay plays until you click **"💧 Sudah minum"**. Prefer to procrastinate? **"💰 Kasih uang"** snoozes it for 5 minutes.
+
+## Assets
+
+All media lives under `assets/`:
+
+```
+assets/
+├── musics/               # background songs (music_1.mp3, music_2.mp3, ...)
+├── video_tabby_busker/   # tabby busker theme
+└── video_kitten_group/   # kitten groups theme
+```
+
+Each video theme folder needs four clips: `pengamen_datang.mp4`, `pengamen_nyanyi.mp4`, `pengamen_kasih.mp4`, and `pengamen_minum.mp4`. Add more `music_N.mp3` files and they'll be auto-detected.
 
 ## Permissions
 
@@ -36,5 +55,4 @@ When the reminder fires, click **"Aku sudah minum"** in the overlay to dismiss i
 |---|---|
 | `storage` | Save your settings |
 | `alarms` | Schedule recurring reminders |
-| `notifications` | Fire OS notification when Chrome is not active |
 | `scripting` | Inject the overlay into your active tab |
