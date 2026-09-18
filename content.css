@@ -2,6 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 2147483647;
+  overflow: hidden;
   font-family: ui-rounded, "SF Pro Rounded", Nunito, Quicksand, ui-sans-serif, system-ui, sans-serif;
 }
 #drink-reminder-overlay .dr-backdrop {
@@ -16,12 +17,14 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  overflow: hidden;
   pointer-events: none;
 }
 #drink-reminder-overlay .dr-canvas {
-  height: 100vh;
-  width: auto;
-  max-width: 100vw;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
   display: block;
   animation: dr-rise 0.45s cubic-bezier(.34,1.56,.64,1);
   filter: drop-shadow(0 12px 28px rgba(0,0,0,0.22));

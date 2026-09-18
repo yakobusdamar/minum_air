@@ -2,6 +2,7 @@ const slider = document.getElementById("interval");
 const val = document.getElementById("val");
 const nextEl = document.getElementById("next");
 const muteEl = document.getElementById("mute");
+const videoTypeEl = document.getElementById("videoType");
 const testBtn = document.getElementById("test");
 const powerEl = document.getElementById("power");
 const settingsEl = document.getElementById("settings");
@@ -67,6 +68,14 @@ slider.addEventListener("input", ()=> val.textContent = fmt(Number(slider.value)
 chrome.storage.local.get({ soundEnabled: true }, ({ soundEnabled }) => { muteEl.checked = !!soundEnabled; });
 muteEl.addEventListener("change", ()=>{
   chrome.storage.local.set({ soundEnabled: muteEl.checked });
+});
+
+// Jenis pengamen: tabby_busker (default) / kitten_groups. Dibaca content.js pas tampil.
+chrome.storage.local.get({ videoType: "tabby_busker" }, ({ videoType }) => {
+  videoTypeEl.value = videoType === "kitten_groups" ? "kitten_groups" : "tabby_busker";
+});
+videoTypeEl.addEventListener("change", ()=>{
+  chrome.storage.local.set({ videoType: videoTypeEl.value });
 });
 
 saveBtn.addEventListener("click", ()=>{

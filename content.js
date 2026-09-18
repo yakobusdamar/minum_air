@@ -2,16 +2,14 @@
   const SCRIPT_VERSION = Symbol("drink-reminder");
   window.__drinkReminderActiveVersion = SCRIPT_VERSION;
 
-  const VIDEO_DATANG_SRC = chrome.runtime.getURL("assets/pengamen_datang.mp4");
-  const VIDEO_NYANYI_SRC = chrome.runtime.getURL("assets/pengamen_nyanyi.mp4");
-  const VIDEO_KASIH_SRC  = chrome.runtime.getURL("assets/pengamen_kasih.mp4");
-  const VIDEO_MINUM_SRC  = chrome.runtime.getURL("assets/pengamen_minum.mp4");
+  const DEFAULT_VIDEO_TYPE = "tabby_busker";
+  const VIDEO_TYPES = { tabby_busker: "video_tabby_busker", kitten_groups: "video_kitten_group" };
   const MAX_MUSIC = 20;
 
   async function detectMusicFiles() {
     const found = [];
     for (let i = 1; i <= MAX_MUSIC; i++) {
-      const url = chrome.runtime.getURL(`assets/music_${i}.mp3`);
+      const url = chrome.runtime.getURL(`assets/musics/music_${i}.mp3`);
       try {
         const res = await fetch(url, { method: "HEAD" });
         if (res.ok) found.push(`music_${i}.mp3`);
@@ -20,12 +18,10 @@
     return found;
   }
 
-  let AUDIO_SRC = null;
-
   async function pickRandomAudio() {
     const files = await detectMusicFiles();
     if (!files.length) return null;
-    return chrome.runtime.getURL("assets/" + files[Math.floor(Math.random() * files.length)]);
+    return chrome.runtime.getURL("assets/musics/" + files[Math.floor(Math.random() * files.length)]);
   }
 
   const GREEN_MIN = 30;
@@ -80,8 +76,16 @@
     // simpan overflow asli halaman biar bisa di-restore utuh pas ditutup
     prevOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
-    // toggle suara (baca langsung storage.local, sama sumbernya dengan popup)
-    const { soundEnabled } = await chrome.storage.local.get({ soundEnabled: true });
+    // toggle suara + jenis video (baca langsung storage.local, sama sumbernya dengan popup)
+    const { soundEnabled, videoType } = await chrome.storage.local.get({
+      soundEnabled: true,
+      videoType: DEFAULT_VIDEO_TYPE
+    });
+    const videoDir = VIDEO_TYPES[videoType] || VIDEO_TYPES[DEFAULT_VIDEO_TYPE];
+    const VIDEO_DATANG_SRC = chrome.runtime.getURL(`assets/${videoDir}/pengamen_datang.mp4`);
+    const VIDEO_NYANYI_SRC = chrome.runtime.getURL(`assets/${videoDir}/pengamen_nyanyi.mp4`);
+    const VIDEO_KASIH_SRC  = chrome.runtime.getURL(`assets/${videoDir}/pengamen_kasih.mp4`);
+    const VIDEO_MINUM_SRC  = chrome.runtime.getURL(`assets/${videoDir}/pengamen_minum.mp4`);
 
     overlay.innerHTML = `
       <div class="dr-backdrop"></div>
@@ -105,22 +109,24 @@
     if (window.__drinkReminderAudio) { try { window.__drinkReminderAudio.pause(); } catch {} }
     if (soundEnabled) {
       const audioSrc = await pickRandomAudio();
-      if (!audioSrc) return; // no music files found
-      bgAudio = new Audio(audioSrc);
-      window.__drinkReminderAudio = bgAudio;
-      bgAudio.loop = false; // habis lagu -> auto close (versi selesai ke-3)
-      bgAudio.volume = 1.0;
-      bgAudio.addEventListener("ended", () => {
-        if (overlay !== thisOverlay || overlay.querySelector(".dr-panel")?.style.display === "none") return;
-        // lagu habis natural, anggap selesai kayak "sudah minum"
-        stopAndRemove();
-        chrome.runtime.sendMessage({ type: "DRANK" }).catch(() => {});
-      });
-      bgAudio.play().catch(() => {
-        const unlock = () => { if (bgAudio) bgAudio.play().catch(()=>{}); };
-        overlay.addEventListener("click", unlock, { once: true });
-        document.addEventListener("click", unlock, { once: true });
-      });
+      // kalau file musik gak ketemu: lanjut tanpa lagu, jangan batalkan seluruh reminder
+      if (audioSrc) {
+        bgAudio = new Audio(audioSrc);
+        window.__drinkReminderAudio = bgAudio;
+        bgAudio.loop = false; // habis lagu -> auto close (versi selesai ke-3)
+        bgAudio.volume = 1.0;
+        bgAudio.addEventListener("ended", () => {
+          if (overlay !== thisOverlay || overlay.querySelector(".dr-panel")?.style.display === "none") return;
+          // lagu habis natural, anggap selesai kayak "sudah minum"
+          stopAndRemove();
+          chrome.runtime.sendMessage({ type: "DRANK" }).catch(() => {});
+        });
+        bgAudio.play().catch(() => {
+          const unlock = () => { if (bgAudio) bgAudio.play().catch(()=>{}); };
+          overlay.addEventListener("click", unlock, { once: true });
+          document.addEventListener("click", unlock, { once: true });
+        });
+      }
     }
     // kalau soundEnabled=false: gak ada lagu, jadi gak ada auto-close saat lagu habis —
     // overlay nutup pas user klik salah satu tombol.
@@ -228,8 +234,10 @@
       switchTo(video);
       const done = () => { video.removeEventListener("ended", done); cb(); };
       video.addEventListener("ended", done);
-      // fallback kalau video gak ada ended (error) -> 4s timeout
-      setTimeout(() => { video.removeEventListener("ended", done); if (overlay===thisOverlay && busy) cb(); }, 5000);
+      // fallback kalau video error / gak pernah fire "ended": ikutin durasi asli video.
+      // jangan hardcode 5s — video kitten (10s) kepotong di tengah kalau pakai 5s.
+      const durMs = Number.isFinite(video.duration) && video.duration > 0 ? video.duration * 1000 : 5000;
+      setTimeout(() => { video.removeEventListener("ended", done); if (overlay===thisOverlay && busy) cb(); }, durMs + 800);
     }
 
     overlay.querySelector("#dr-drank").addEventListener("click", () => {
